@@ -2,7 +2,10 @@ const electron = require('electron')
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
+// 浏览器窗口
 const BrowserWindow = electron.BrowserWindow
+// 浏览器view
+const BrowserView = electron.BrowserView
 
 const path = require('path')
 const url = require('url')
@@ -13,18 +16,39 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600})
+  // mainWindow = new BrowserWindow({width: 800, height: 600})
 
   // and load the index.html of the app.
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, '../dist/index.html'),
-    protocol: 'file:',
-    slashes: true
-  }))
+  // mainWindow.loadURL(url.format({
+  //   pathname: path.join(__dirname, '../dist/index.html'),
+  //   protocol: 'file:',
+  //   slashes: true
+  // }))
   // mainWindow.loadURL('https://ncumovi.github.io/')
 
   // let win = new BrowserWindowProxy()
+
   // win.open ('https://ncumovi.github.io/')
+
+  let top = new BrowserWindow({width: 800, height: 600})
+  top.loadURL('https://github.com/')
+
+  let child = new BrowserWindow({parent: top,width: 400, height: 500,modal: true, show: false})
+  child.loadURL('https://www.baidu.com/')
+
+  child.once('ready-to-show', () => {
+    child.show()
+  })
+
+  // let view = new BrowserView({
+  //   webPreferences: {
+  //     nodeIntegration: false
+  //   }
+  // })
+  // mainWindow.setBrowserView(view)
+  // view.setBounds({ x: 0, y: 0, width: 300, height: 300 })
+  // view.webContents.loadURL('https://ncumovi.github.io/')
+
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools()

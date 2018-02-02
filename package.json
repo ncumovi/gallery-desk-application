@@ -1,5 +1,5 @@
 {
-  "name": "vue-gallery",
+  "name": "beanSprout",
   "version": "1.0.0",
   "description": "A gallery based on vue",
   "author": "movi <451299572@qq.com>",
@@ -8,9 +8,9 @@
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
     "build": "node build/build.js",
-    "electron_dev": "npm run build && electron build/electron.js",
-    "electron_build": "electron-packager ./dist/ ni豆芽 --platform=win32 --arch=x64 --icon=./src/assets/favicon.ico --overwrite"
-
+    "electron_dev": "electron build/electron.js",
+    "electron_build": "electron-packager ./dist/ beanSprout --win --out beanSprout --platform=win32 --arch=x64 --icon=./src/assets/favicon.ico --version 1.3.4.0  --ignore=node_modules --overwrite",
+    "ele_setup_build": "grunt"
   },
   "dependencies": {
     "vue": "^2.5.2",
@@ -30,10 +30,12 @@
     "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.28.0",
     "electron": "^1.7.12",
-    "electron-packager": "^10.1.2",
+    "electron-packager": "^9.1.0",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^1.1.4",
     "friendly-errors-webpack-plugin": "^1.6.1",
+    "grunt": "^1.0.1",
+    "grunt-electron-installer": "^2.1.0",
     "html-webpack-plugin": "^2.30.1",
     "node-notifier": "^5.1.2",
     "optimize-css-assets-webpack-plugin": "^3.2.0",

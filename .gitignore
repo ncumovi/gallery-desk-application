@@ -1,6 +1,6 @@
 .DS_Store
 node_modules/
-ni豆芽-win32-x64/
+beanSprout/
 
 # dist文件夹不忽略 但是忽略dist下面的static
 # /dist/
