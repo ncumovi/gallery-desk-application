@@ -1,0 +1,20 @@
+.DS_Store
+node_modules/
+ni豆芽-win32-x64/
+
+# dist文件夹不忽略 但是忽略dist下面的static
+# /dist/
+dist/static
+
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
