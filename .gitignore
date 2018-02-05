@@ -5,6 +5,7 @@ beanSprout/
 # dist文件夹不忽略 但是忽略dist下面的static
 # /dist/
 dist/static
+./dist/*.html
 
 
 npm-debug.log*
@@ -18,3 +19,4 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+/dist/index.html

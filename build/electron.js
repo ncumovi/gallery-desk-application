@@ -2,13 +2,63 @@ const electron = require('electron')
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
-// 浏览器窗口
 const BrowserWindow = electron.BrowserWindow
-// 浏览器view
-const BrowserView = electron.BrowserView
 
 const path = require('path')
 const url = require('url')
+
+//监听Squirrel事件
+// 监听的目的主要是为了在安装之后自动创建App快捷方式，还有为之后的自动更新做准备
+var handleStartupEvent = function() {
+  if (process.platform !== 'win32') {
+    return false;
+  }
+
+  var squirrelCommand = process.argv[1];
+  switch (squirrelCommand) {
+    case '--squirrel-install':
+    case '--squirrel-updated':
+      install();
+      return true;
+    case '--squirrel-uninstall':
+      uninstall();
+      app.quit();
+      return true;
+    case '--squirrel-obsolete':
+      app.quit();
+      return true;
+  }
+
+  // 安装
+  function install() {
+    var cp = require('child_process');
+    var updateDotExe = path.resolve(path.dirname(process.execPath), '..', 'update.exe');
+    var target = path.basename(process.execPath);
+    var child = cp.spawn(updateDotExe, ["--createShortcut", target], { detached: true });
+    child.on('close', function(code) {
+        app.quit();
+    });
+  }
+
+
+ // 卸载
+  function uninstall() {
+    var cp = require('child_process');
+    var updateDotExe = path.resolve(path.dirname(process.execPath), '..', 'update.exe');
+    var target = path.basename(process.execPath);
+    var child = cp.spawn(updateDotExe, ["--removeShortcut", target], { detached: true });
+    child.on('close', function(code) {
+        app.quit();
+    });
+  }
+
+};
+
+if (handleStartupEvent()) {
+  return;
+}
+
+
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -16,42 +66,21 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  // mainWindow = new BrowserWindow({width: 800, height: 600})
+  mainWindow = new BrowserWindow({width: 1000, height: 800})
 
   // and load the index.html of the app.
-  // mainWindow.loadURL(url.format({
-  //   pathname: path.join(__dirname, '../dist/index.html'),
-  //   protocol: 'file:',
-  //   slashes: true
-  // }))
+  mainWindow.loadURL(url.format({
+    pathname: path.join(__dirname, '../dist/index.html'),
+    protocol: 'file:',
+    slashes: true
+  }))
   // mainWindow.loadURL('https://ncumovi.github.io/')
 
   // let win = new BrowserWindowProxy()
-
   // win.open ('https://ncumovi.github.io/')
 
-  let top = new BrowserWindow({width: 800, height: 600})
-  top.loadURL('https://github.com/')
-
-  let child = new BrowserWindow({parent: top,width: 400, height: 500,modal: true, show: false})
-  child.loadURL('https://www.baidu.com/')
-
-  child.once('ready-to-show', () => {
-    child.show()
-  })
-
-  // let view = new BrowserView({
-  //   webPreferences: {
-  //     nodeIntegration: false
-  //   }
-  // })
-  // mainWindow.setBrowserView(view)
-  // view.setBounds({ x: 0, y: 0, width: 300, height: 300 })
-  // view.webContents.loadURL('https://ncumovi.github.io/')
-
-
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
