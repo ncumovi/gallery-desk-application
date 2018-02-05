@@ -1,49 +1,188 @@
-# vue-gallery
+## [demo](https://ncumovi.github.io/2018/02/05/desk-appliction/)
 
-> A gallery based on vue
+## vue项目
 
-## Build Setup
+确保自己有一个vue项目，可以是vue脚手架工程目录，也可以是已经生成的静态资源文件
 
-### install dependencies
-> npm install
+## electron安装与使用
 
-###  serve with hot reload at localhost:8080
-> npm run dev
+#### 安装electron以及相关工具
 
-###  build for production with minification
-> npm run build
+在项目根目录下面运行**npm install electron --save-dev** [安装electron](https://electronjs.org/)
 
-###  build for production and view the bundle analyzer report
-> npm run build --report
+**npm install electron-packager --save-dev** [安装exe打包工具](https://github.com/electron-userland/electron-packager)
 
-## Gallery By React
+**npm install grunt --save-dev** 安装grunt用于打包可安装的exe
 
-one gallery project based on react
-
-使用 *vue2.x* 构架的图片画廊应用-参照慕课网《React实战》课程对应的画廊应用实战项目 
-
-## Demo & Examples
-
-Live demo: https://ncumovi.github.io/gallery-react/
+**npm install --save-dev grunt-electron-installer** [安装grunt打包可安装的exe插件](https://github.com/electron-archive/grunt-electron-installer)
 
 
-## Guideline
+#### 在本地克隆electron官方demo项目
 
-icon文件引用的是阿里巴巴矢量图库 
+git clone https://github.com/electron/electron-quick-start
 
-*link rel="stylesheet" href="//at.alicdn.com/t/font_510621_gkv0t0kevfs9k9.css"*
 
-## thinking
+#### 在Vue项目里面引入electron主程序main.js
 
-  相比react的全程js操作（包括传递方法到子组件以及行内样式和class的相关传递和写法，基本都是字符串拼接的），个人觉得vue使用起来更得心应手。
-  组件化开发，vue生命周期、数据传递等，用起来更方便。不过可能是因为我很少使用react，基本在平时开发工作中都是用vue的。
-  vue也有一堆的坑，就拿数据传递来说吧，明明props上面有值，但是在template里面使用的时候却报错。
-  可能是我生命周期理解不到位，使用不当，最后用了黑魔法--延时器解决了问题，尴尬ing...
+把electron-quick-start项目中的main.js搬到vue的build文件中，并改个名字electron.js。
 
-## 求赞
+将electron.js里面的文件路径修改成符合本项目的路径
 
-你的赞是我升职加薪，迎娶白富美，走上人生巅峰的基石和动力。
+    mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, '../dist/index.html'),
+        protocol: 'file:',
+        slashes: true
+    }))
 
+#### 在package.json中添加入口
+
+    "scripts": {
+        "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+        "start": "npm run dev",
+        "build": "node build/build.js",
+        "electron_dev": "electron build/electron.js",  //本地调试用
+        //打包成不用安装的exe文件
+        "electron_build": "electron-packager ./dist/ beanSprout --win --out beanSprout --platform=win32 --arch=x64 --icon=./src/assets/favicon.ico --version 1.3.4.0  --ignore=node_modules --overwrite",
+        "ele_setup_build": "grunt" //打包成可安装的安装包
+    },
+
+## dev 调试环境
+
+先运行**npm run build**将vue项目打包成静态资源文件，再运行**electron_dev**即可看到调试环境下的桌面应用
+
+## 打包不用安装的exe文件(electron-packager)
+
+运行**npm run electron_build**即可打包成不用安装的exe文件
+
+"electron-packager ./dist/ beanSprout --win --out beanSprout --platform=win32 --arch=x64 --icon=./src/assets/favicon.ico --version 1.3.4.0  --ignore=node_modules --overwrite"
+
+1、 './dist' 表示打包的源文件，即dist目录下面打包好的资源文件(需要在这个目录下面添加electron运行的入口)
+
+    dist
+    ├── static
+    ├── index.html
+    ├── main.js
+    └── package.json
+
+这里的main.js就是build目录下面的electron.js，不过这里的路径要修改一下
+
+    mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'index.html'),  //这里的路径要修改
+        protocol: 'file:',
+        slashes: true
+    }))
+
+2、'beanSprout' 打包exe的名字
+
+3、 '--win --out beanSprout' 输出的文件夹名字
+
+4、'--platform=win32' 平台
+
+5、 '--icon=./src/assets/favicon.ico' 打包以后的icon，即exe图标
+
+打包成功以后的目录如下
+
+    beanSprout
+        └── beanSprout-win32-x64
+                    ├── ...
+                    └── beanSprout.exe  //双击即可运行
+
+本例参看 [j_bleach博客-electron 将pc端（vue）页面打包为桌面端应用](http://blog.csdn.net/j_bleach/article/details/78513282)
+
+## 打包需要安装的exe文件目录(grunt-electron-installer)
+
+首先在根目录下面新建**Gruntfile.js**
+
+    var grunt = require('grunt');
+
+    //进行配置
+    grunt.config.init({
+    pkg:grunt.file.readJSON('package.json'),
+    'create-windows-installer': {
+        x64: {
+            appDirectory: './beanSprout/beanSprout-win32-x64', //已经打包的electron App目录
+            outputDirectory: './beanSprout/beanSproutSetup',    //输出的资源目录
+            authors: 'movi',    //发布者
+            exe: 'beanSprout.exe',  //这里的名字要和之前打包成不需安装exe文件的名字保持一致
+            description:" A desk application based on vue and elecron",
+            loadingGif:"./src/assets/install.gif",  //安装动画
+            setupIcon:"./src/assets/favicon.ico" //生成桌面快捷方式的图标
+        }
+    }
+    })
+
+    //加载任务
+    grunt.loadNpmTasks('grunt-electron-installer')
+
+    //设置默认任务
+    grunt.registerTask('default',['create-windows-installer'])
+
+    grunt.tasks()
+
+
+运行**npm run ele_setup_build**即可打包成需要安装的exe文件目录
+
+打包成功以后的目录如下
+
+    beanSprout
+        └── beanSproutSetup
+                ├── ...
+                └── Setup.exe  //双击开始安装
+
+可参看 [Long-Island的博客-使用Grunt 插件打包Electron Windows应用](http://blog.csdn.net/w342916053/article/details/51701722)
+
+## 自动生成快捷方式
+
+需要在./dist/main.js加上如下代码
+
+    var handleStartupEvent = function() {
+    if (process.platform !== 'win32') {
+        return false;
+    }
+
+    var squirrelCommand = process.argv[1];
+    switch (squirrelCommand) {
+        case '--squirrel-install':
+        case '--squirrel-updated':
+        install();
+        return true;
+        case '--squirrel-uninstall':
+        uninstall();
+        app.quit();
+        return true;
+        case '--squirrel-obsolete':
+        app.quit();
+        return true;
+    }
+
+    // 安装
+    function install() {
+        var cp = require('child_process');
+        var updateDotExe = path.resolve(path.dirname(process.execPath), '..', 'update.exe');
+        var target = path.basename(process.execPath);
+        var child = cp.spawn(updateDotExe, ["--createShortcut", target], { detached: true });
+        child.on('close', function(code) {
+            app.quit();
+        });
+    }
+
+
+    // 卸载
+    function uninstall() {
+        var cp = require('child_process');
+        var updateDotExe = path.resolve(path.dirname(process.execPath), '..', 'update.exe');
+        var target = path.basename(process.execPath);
+        var child = cp.spawn(updateDotExe, ["--removeShortcut", target], { detached: true });
+        child.on('close', function(code) {
+            app.quit();
+        });
+    }
+
+    };
+
+    if (handleStartupEvent()) {
+    return;
+    }
 
 ## 注意
 
@@ -53,4 +192,5 @@ icon文件引用的是阿里巴巴矢量图库
 "version": "1.0.1"   //亲测1.0.0和1.0.1有用
 ```
 
-这里的版本不能随便写，不然在用electron-packager打包成安装应用时会提示版本号不对，不符合规范等，导致打包失败
+这里的版本不能随便写，不然在用**grunt-electron-installer**打包成安装应用时会提示版本号不对，不符合规范等，导致打包失败
+
