@@ -1,4 +1,4 @@
-## [demo](https://ncumovi.github.io/2018/02/05/desk-appliction/)
+## [demo链接](https://ncumovi.github.io/2018/02/05/desk-appliction/)
 
 ## vue项目
 
