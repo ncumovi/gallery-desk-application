@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
-    "build": "node build/build.js",
+    // "build": "grunt img && node build/build.js ",   压缩效果不理想
+    "build": "node build/build.js ",
     "electron_dev": "node build/build.js && electron build/electron.js ",
     "electron_build": "electron-packager ./dist/ beanSprout --win --out beanSprout --platform=win32 --arch=x64 --icon=./src/assets/favicon.ico --version 1.3.4.0  --ignore=node_modules --overwrite",
     "ele_setup_build": "grunt"
@@ -35,6 +36,7 @@
     "file-loader": "^1.1.4",
     "friendly-errors-webpack-plugin": "^1.6.1",
     "grunt": "^1.0.1",
+    "grunt-contrib-imagemin": "^2.0.1",
     "grunt-electron-installer": "^2.1.0",
     "html-webpack-plugin": "^2.30.1",
     "node-notifier": "^5.1.2",
