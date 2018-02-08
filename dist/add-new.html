@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>为我们的心路历程添砖加瓦</title>
+  <script src="./lib/vue.js"></script>
+  <script src="./lib/jquery.js"></script>
+  <!-- <script src="./upload-img"></script> -->
+  <style type="text/css">
+    *{
+      margin: 0;
+      padding: 0;
+    }
+    .img-wrap{
+      width:33%;
+      display: inline-block;
+      text-align: center;
+    }
+    .img-wrap img{
+      max-width: 100%;
+      height: 200px;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="app">
+    <input type="file" multiple accept="image/gif, image/jpeg" @change="upload(event)">
+    <div id='img-list'>
+      <div class="img-wrap" v-for='img in imgList'>
+        <img :src="img.src" alt="">
+        <p><textarea name="" id=""  v-model="img.desc" placeholder="请输入描述哦。。。"></textarea></p>
+        <p><textarea name="" id=""  v-model="img.title" placeholder="请输入标题哦。。。"></textarea></p>
+      </div>
+    </div>
+    <button @click='editImgJson'>保存</button>
+  </div>
+
+<script>
+  const fs = require("fs")
+  const path = require("path")
+  const {shell} = require('electron');
+  const ipc = require('electron').ipcRenderer;
+  //dev开发环境下面路径
+  var path_img_save = path.join(process.cwd(),'static/');  //图片存储路径
+  var path_json = path.join(process.cwd(),'static/imageDatas.json');//图文信息路径imageDatas.json
+  //生产环境下面的的相关路径
+  if((/32/).test(process.cwd())){
+    path_img_save = path.join(process.cwd(),'../../static/');
+    path_json = path.join(process.cwd(),'../../static/imageDatas.json');
+  }
+  const source = require(path_json)
+  var vm = new Vue({
+  el: '#app',
+  data: {
+    imgList: []
+  },
+  methods:{
+    duplicate(arr1,x){
+      if(arr1.length ==2){
+          for (var i = 0;i<arr1.length;i++) {
+              for (var j =1;j<arr1.length;j++) {
+                  if(arr1[i].x == arr1[j].x){
+                      arr1.splice(j,1)
+                  }
+              }
+          }
+      }else{
+          for (var i = 0;i<arr1.length;i++) {
+              for (var j =1;j<arr1.length-1;j++) {
+                  if(arr1[i].x == arr1[j].x){
+                      arr1.splice(j,1)
+                  }
+              }
+          }
+      }
+      return arr1
+    },
+    editImgJson(){
+      // 以追加方式写文件修改src/assets/imageDatas.json
+      var list = [].concat(JSON.parse(JSON.stringify(source)));
+      for(let i=0;i<this.imgList.length;i++){
+        var newImgObj = {
+          "fileName": this.imgList[i].fileName,
+          "title": this.imgList[i].title,
+          "desc": this.imgList[i].desc
+        }
+        list.push(newImgObj);
+      }
+      fs.open(path_json, 'w+', function (err, fd) {
+        if(err) {
+          console.error(err);
+          return;
+        } else {
+          var buffer = new Buffer(JSON.stringify(list));
+          fs.write(fd, buffer,  function (err, written, buffer) {
+            if(err) {
+              console.log('写入文件失败');
+              console.error(err);
+              return;
+            }else{
+              ipc.send('build') //build的指令。send到主进程index.js中。
+              alert('正在努力地为小主您生成照片墙哦，请耐心等待。。。')
+            }
+          });
+        }
+      });
+    },
+    upload(e){
+      var f = e.target.files;
+      for(let i=0;i<f.length;i++){
+          var reader = new FileReader();
+          reader.readAsDataURL(f[i]);
+          reader.onload = function(e){
+            var obj={
+              desc : '',
+              title:'',
+              fileName: f[i].name.replace(/\..*$/,'.png')
+            };
+            obj.src = e.target.result;
+            vm.imgList.push(obj);
+            // 存储到本地
+            var base64Data = e.target.result.replace(/^data:image\/\w+;base64,/, ""); //过滤data:URL
+            var dataBuffer = new Buffer(base64Data, 'base64');
+            // 存储到本地static文件
+            fs.writeFile(path_img_save + f[i].name.replace(/\..*$/,'.png') , dataBuffer, function(err) {
+                if(err){
+                 console.log('保存失败')
+                }else{
+                  console.log("保存成功！");
+                }
+            });
+          }
+      }
+    }
+  }
+})
+
+
+</script>
+</body>
+</html>

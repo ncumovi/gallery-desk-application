@@ -3,9 +3,46 @@ const electron = require('electron')
 const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
-
+// 主菜单模块
+const Menu = electron.Menu
+// 文件上传模块
 const path = require('path')
 const url = require('url')
+
+
+
+const template = [
+  {
+    label: '新增里程',
+    click () { console.log('dddd') }
+  },
+  {
+    label: '我们的心路历程',
+    click () {
+      mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, '../dist/index.html'),
+        protocol: 'file:',
+        slashes: true
+      }))
+    }
+  },
+  {
+    label: '心无所恃博客',
+    submenu: [
+      {
+        label: 'you can do this either',
+        click () {mainWindow.loadURL('https://ncumovi.github.io/2018/02/05/desk-appliction/') }
+      }
+    ]
+  }
+]
+
+
+const menu = Menu.buildFromTemplate(template)
+Menu.setApplicationMenu(menu)
+
+
+
 
 //监听Squirrel事件
 // 监听的目的主要是为了在安装之后自动创建App快捷方式，还有为之后的自动更新做准备
@@ -66,21 +103,19 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1000, height: 800})
-
+  mainWindow = new BrowserWindow()
+  // 窗口最大化
+  mainWindow.maximize();
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, '../dist/index.html'),
     protocol: 'file:',
     slashes: true
   }))
-  // mainWindow.loadURL('https://ncumovi.github.io/')
 
-  // let win = new BrowserWindowProxy()
-  // win.open ('https://ncumovi.github.io/')
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {

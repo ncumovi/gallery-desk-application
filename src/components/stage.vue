@@ -13,7 +13,7 @@
 import ImgFigure from './ImgFigure';
 import Control from './Control';
 //获取相关图片的数据
-var imgDatas = require('../assets/imageDatas.json');
+var imgDatas = require('../../static/imageDatas.json');
 
 //利用执行函数 将图片信息转化成图片URL路径信息
 imgDatas = (function genImageUrl(imageDatasArr) {

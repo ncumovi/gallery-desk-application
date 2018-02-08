@@ -3,9 +3,75 @@ const electron = require('electron')
 const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
-
+// 主菜单模块
+const Menu = electron.Menu
+// 文件上传模块
 const path = require('path')
 const url = require('url')
+ // 打开系统本地文件或者网页链接
+const {shell} = require('electron');
+//build下面的run.bat脚本
+var path_run_dev =  path.join(process.cwd(),'build/run.bat');
+var path_run_build =  path.join(process.cwd(),'build/build.bat');
+var path_json = path.join(process.cwd(),'static/imageDatas.json');//图文信息路径imageDatas.json
+
+if((/beanSprout/).test(process.cwd())){
+  path_run_dev =  path.join(process.cwd(),'../../build/run.bat');
+  path_run_build =  path.join(process.cwd(),'../../build/build.bat');
+  path_json = path.join(process.cwd(),'../../static/imageDatas.json');
+
+}
+let has_new =  false  //判断是否有新的资源加入imageDataJson文件是否有变化
+// 页面之间通讯
+const ipc = require('electron').ipcMain;
+//新增里程页面点击保存后 历程页面要接受事件
+ipc.on('build',function() {
+  has_new = true
+  shell.openItem(path_run_dev);
+  shell.openItem(path_run_build);
+  setTimeout(function(){
+    mainWindow.destroy()
+  },3000)
+})
+
+const template = [
+  {
+    label: '新增里程',
+    click () {
+      mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'add-new.html'),
+        protocol: 'file:',
+        slashes: true
+      }))
+    }
+  },
+  {
+    label: '我们的心路历程',
+    click () {
+      mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'index.html'),
+        protocol: 'file:',
+        slashes: true
+      }))
+    }
+  },
+  {
+    label: '心无所恃博客',
+    submenu: [
+      {
+        label: 'you can do this either',
+        click () {mainWindow.loadURL('https://ncumovi.github.io/2018/02/05/desk-appliction/') }
+      }
+    ]
+  }
+]
+
+
+const menu = Menu.buildFromTemplate(template)
+Menu.setApplicationMenu(menu)
+
+
+
 
 //监听Squirrel事件
 // 监听的目的主要是为了在安装之后自动创建App快捷方式，还有为之后的自动更新做准备
@@ -63,21 +129,22 @@ if (handleStartupEvent()) {
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+let lengthOfJson //imageDataJson的长度 是否有新的资源加入 如果有则build
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1000, height: 800})
-
+  mainWindow = new BrowserWindow()
+  // 窗口最大化
+  mainWindow.maximize();
   // and load the index.html of the app.
+  lengthOfJson = require(path_json).length
+
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'index.html'),
     protocol: 'file:',
     slashes: true
   }))
-  // mainWindow.loadURL('https://ncumovi.github.io/')
 
-  // let win = new BrowserWindowProxy()
-  // win.open ('https://ncumovi.github.io/')
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
@@ -89,7 +156,11 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
 }
+
+
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
