@@ -13,13 +13,10 @@ const {shell} = require('electron');
 //build下面的run.bat脚本
 var path_run_dev =  path.join(process.cwd(),'build/run.bat');
 var path_run_build =  path.join(process.cwd(),'build/build.bat');
-var path_json = path.join(process.cwd(),'static/imageDatas.json');//图文信息路径imageDatas.json
 
 if((/beanSprout/).test(process.cwd())){
   path_run_dev =  path.join(process.cwd(),'../../build/run.bat');
   path_run_build =  path.join(process.cwd(),'../../build/build.bat');
-  path_json = path.join(process.cwd(),'../../static/imageDatas.json');
-
 }
 let has_new =  false  //判断是否有新的资源加入imageDataJson文件是否有变化
 // 页面之间通讯
@@ -66,8 +63,35 @@ const template = [
   }
 ]
 
+const template_no_add = [
+  {
+    label: '我们的心路历程',
+    click () {
+      mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'index.html'),
+        protocol: 'file:',
+        slashes: true
+      }))
+    }
+  },
+  {
+    label: '心无所恃博客',
+    submenu: [
+      {
+        label: 'you can do this either',
+        click () {mainWindow.loadURL('https://ncumovi.github.io/2018/02/05/desk-appliction/') }
+      }
+    ]
+  }
+]
 
-const menu = Menu.buildFromTemplate(template)
+let menu
+if((/beanSprout/).test(process.cwd())){
+  menu = Menu.buildFromTemplate(template_no_add)
+}else{
+  menu = Menu.buildFromTemplate(template)
+}
+
 Menu.setApplicationMenu(menu)
 
 
@@ -137,7 +161,6 @@ function createWindow () {
   // 窗口最大化
   mainWindow.maximize();
   // and load the index.html of the app.
-  lengthOfJson = require(path_json).length
 
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'index.html'),
@@ -147,7 +170,7 @@ function createWindow () {
 
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
