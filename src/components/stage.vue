@@ -6,6 +6,7 @@
       <nav class='controller-nav'>
         <control v-for='(img,index) in imageDatas' :key="index" :img-datas='img'  @click.native='controlImg(index)'></control>
       </nav>
+      <audio autoplay="autoplay" :src="require('../../static/music/sdggh.mp3')" type="audio/mp3"></audio>
     </section>
 </template>
 
@@ -32,6 +33,7 @@ export default {
   data () {
     return {
       imageDatas:imgDatas, //获取相关图片的数据
+      utterThis: new window.SpeechSynthesisUtterance(), //语音合成
       // imageArrays:[], //自定义添加的一些数据状态 例如：是否是居中 是否翻转等
       Constant:{
         centerPos: {
@@ -56,6 +58,10 @@ export default {
   },
   mounted:function(){
     var that = this;
+    this.utterThis.text =  '亲爱的淘宝宝，祝你生日快乐哟！！！祝你越来越漂亮，越活越年轻。。';
+    setTimeout(() => {
+        window.speechSynthesis.speak(this.utterThis);
+    },6666)
     this.initStage();
     window.onresize = function(){
       that.initStage();
@@ -113,7 +119,12 @@ export default {
     },
     // 翻转图片
     inverse(index){
-
+      this.utterThis.text =  this.imageDatas[index].desc;
+      if(!this.imageDatas[index].isInverse){
+          window.speechSynthesis.speak(this.utterThis);
+      }else{
+          window.speechSynthesis.cancel();
+      }
       this.imageDatas[index].isInverse = !this.imageDatas[index].isInverse;
 
     },
@@ -122,6 +133,7 @@ export default {
       if(this.imageDatas[index].isCenter){
         this.inverse(index);
       }else{
+        window.speechSynthesis.cancel();
         this.rearrange(index);
       }
     },
