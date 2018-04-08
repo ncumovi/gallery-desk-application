@@ -6,7 +6,7 @@
       <nav class='controller-nav'>
         <control v-for='(img,index) in imageDatas' :key="index" :img-datas='img'  @click.native='controlImg(index)'></control>
       </nav>
-      <audio autoplay="autoplay" :src="require('../../static/music/sdggh.mp3')" type="audio/mp3"></audio>
+      <audio autoplay="autoplay" :src="require('../../static/music/sdggh.mp3')" type="audio/mp3" loop="loop"></audio>
     </section>
 </template>
 
